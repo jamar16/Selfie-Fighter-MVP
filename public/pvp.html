@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Selfie Fighter — Live Match</title>
+<link rel="stylesheet" href="/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Live Match</h1>
+  <p class="subtitle">Pick your attack, then brace for what's coming — in real time.</p>
+
+  <p id="error"></p>
+
+  <div id="waiting" style="display:none;">
+    <p class="section-label">Waiting for opponent...</p>
+    <p class="section-hint">Share this room code with your friend. They can paste it into "Join Match" on the home page.</p>
+    <div class="room-code-row">
+      <code id="room-code"></code>
+      <button type="button" id="copy-code-btn" class="secondary">Copy</button>
+    </div>
+    <a class="back-link" href="/">← Back home</a>
+  </div>
+
+  <div id="battle" style="display:none;">
+    <a class="back-link" href="/">← Leave match</a>
+    <div class="fighters">
+      <div class="fighter">
+        <div class="avatar" id="me-avatar">🥋</div>
+        <h3 id="me-name">You</h3>
+        <div class="hp-bar"><div class="hp-fill" id="me-hp-fill"></div></div>
+        <div class="hp-label" id="me-hp-label">100 / 100</div>
+      </div>
+      <div class="fighter">
+        <div class="avatar" id="opp-avatar">🥋</div>
+        <h3 id="opp-name">Opponent</h3>
+        <div class="hp-bar"><div class="hp-fill" id="opp-hp-fill"></div></div>
+        <div class="hp-label" id="opp-hp-label">100 / 100</div>
+      </div>
+    </div>
+
+    <p id="turn-status" class="section-hint"></p>
+
+    <div id="fight-controls" style="display:none;">
+      <p class="section-label">Choose your attack</p>
+      <p class="section-hint">This is the move you'll throw this turn.</p>
+      <div class="move-pick" id="attack-picks"></div>
+
+      <p class="section-label">Brace for incoming</p>
+      <p class="section-hint">Which of the opponent's moves are you reading? Guess their ★ signature move correctly and it backfires on them.</p>
+      <div class="move-pick" id="guess-picks"></div>
+
+      <button id="fight-btn" type="button" disabled>Fight!</button>
+    </div>
+
+    <div id="log"></div>
+
+    <div id="game-over" style="display:none;">
+      <p id="result-text" class="section-label"></p>
+    </div>
+  </div>
+
+  <script src="/pvp.js"></script>
+</body>
+</html>

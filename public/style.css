@@ -1,0 +1,348 @@
+:root {
+  color-scheme: dark;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #14141f;
+  color: #f0f0f5;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+}
+p.subtitle {
+  color: #9a9ab0;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+input, textarea, select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #33334a;
+  background: #1e1e2e;
+  color: #f0f0f5;
+  font-size: 0.95rem;
+}
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+button {
+  margin-top: 24px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #6c5ce7;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:disabled {
+  background: #4a4a66;
+  cursor: not-allowed;
+}
+button.secondary {
+  background: #2e3a59;
+}
+#error {
+  color: #ff6b6b;
+  margin-top: 16px;
+  display: none;
+}
+#results {
+  margin-top: 32px;
+  display: none;
+}
+#selfie-preview {
+  display: block;
+  margin-top: 10px;
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 10px;
+  border: 1px solid #33334a;
+  object-fit: cover;
+}
+#portrait-wrap {
+  display: none;
+  margin-bottom: 20px;
+  text-align: center;
+}
+#portrait {
+  max-width: 100%;
+  max-height: 420px;
+  border-radius: 14px;
+  border: 1px solid #33334a;
+}
+#portrait-status {
+  color: #9a9ab0;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+#save-status {
+  color: #2dd881;
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+}
+#saved-fighters {
+  margin-bottom: 28px;
+}
+.saved-fighter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #1e1e2e;
+  border: 1px solid #33334a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.saved-fighter-name {
+  font-weight: 700;
+  flex: 1;
+}
+.saved-fighter-date {
+  color: #9a9ab0;
+  font-size: 0.8rem;
+}
+.saved-fighter-btn {
+  margin-top: 0;
+  width: auto;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  background: #2e3a59;
+}
+.saved-fighter-btn.fight-btn {
+  background: #7a2e2e;
+}
+.move {
+  background: #1e1e2e;
+  border: 1px solid #33334a;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.move-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.move-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.move-damage {
+  color: #feca57;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.move-desc {
+  color: #c4c4d8;
+  margin: 6px 0 10px;
+  font-size: 0.92rem;
+}
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tag {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.tag.counter {
+  background: #2d6a4f;
+  color: #b7e4c7;
+}
+.tag.unblockable {
+  background: #7a2e2e;
+  color: #ffc9c9;
+}
+.tag.blockable {
+  background: #2e3a59;
+  color: #c9d6ff;
+}
+
+/* Combat screen */
+.fighters {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+.fighter {
+  flex: 1;
+  background: #1e1e2e;
+  border: 1px solid #33334a;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.fighter h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+.avatar {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  background: #14141f;
+  border: 1px solid #33334a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  overflow: hidden;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hp-bar {
+  height: 14px;
+  border-radius: 999px;
+  background: #33334a;
+  overflow: hidden;
+}
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2dd881, #6c5ce7);
+  transition: width 0.3s ease;
+}
+.hp-fill.low {
+  background: linear-gradient(90deg, #ff6b6b, #feca57);
+}
+.hp-label {
+  font-size: 0.8rem;
+  color: #9a9ab0;
+  margin-top: 4px;
+}
+.move-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.move-pick-btn {
+  margin-top: 0;
+  background: #1e1e2e;
+  border: 1px solid #33334a;
+  color: #f0f0f5;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 10px 8px;
+  text-align: left;
+}
+.move-pick-btn .pick-dmg {
+  color: #feca57;
+  font-weight: 700;
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+.move-pick-btn.selected {
+  border-color: #6c5ce7;
+  background: #2a2a44;
+}
+.section-label {
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 4px;
+}
+.section-hint {
+  color: #9a9ab0;
+  font-size: 0.85rem;
+  margin: 0 0 8px;
+}
+#live-match {
+  margin-bottom: 28px;
+}
+.join-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.join-row input {
+  flex: 1;
+}
+.join-row button {
+  margin-top: 0;
+  width: auto;
+  padding: 10px 16px;
+}
+.room-code-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.room-code-row code {
+  flex: 1;
+  background: #1e1e2e;
+  border: 1px solid #33334a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+.room-code-row button {
+  margin-top: 0;
+  width: auto;
+  padding: 10px 16px;
+}
+#log {
+  margin-top: 24px;
+  background: #1e1e2e;
+  border: 1px solid #33334a;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+#log .entry {
+  padding: 6px 0;
+  border-bottom: 1px solid #2a2a3e;
+  color: #c4c4d8;
+}
+#log .entry:last-child {
+  border-bottom: none;
+}
+#log .entry.win {
+  color: #2dd881;
+  font-weight: 700;
+}
+#log .entry.lose {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+#log .entry.punish {
+  color: #feca57;
+  font-weight: 700;
+}
+.back-link {
+  display: inline-block;
+  margin-top: 16px;
+  color: #9a9ab0;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.back-link:hover {
+  color: #c4c4d8;
+}

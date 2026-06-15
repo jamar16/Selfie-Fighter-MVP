@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Selfie Fighter — Moveset Generator</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <h1>Selfie Fighter</h1>
+  <p class="subtitle">Tell us about yourself. Claude will build your moveset.</p>
+
+  <div id="saved-fighters" style="display:none;">
+    <p class="section-label">Recent Fighters</p>
+    <p class="section-hint">Load one of these as your fighter, or challenge one remotely with "⚔ Fight".</p>
+    <div id="saved-fighters-list"></div>
+  </div>
+
+  <div id="live-match">
+    <p class="section-label">Live Match</p>
+    <p class="section-hint">Battle a friend in real time. Load a fighter above (or generate one below) first.</p>
+    <button type="button" id="create-match-btn" class="secondary">Create Match</button>
+    <div class="join-row">
+      <input id="join-match-code" placeholder="Paste a room code to join" />
+      <button type="button" id="join-match-btn" class="secondary">Join</button>
+    </div>
+    <p id="live-match-status" class="section-hint"></p>
+  </div>
+
+  <form id="bio-form">
+    <label for="charName">Fighter name</label>
+    <input id="charName" name="charName" placeholder="e.g. Maya &quot;The Riptide&quot; Chen" required />
+
+    <label for="sports">Sports / athletic background</label>
+    <input id="sports" name="sports" placeholder="e.g. high school quarterback, ran track" required />
+
+    <label for="bestSkill">What's your best skill?</label>
+    <input id="bestSkill" name="bestSkill" placeholder="e.g. trick shots, fast reflexes, staying calm under pressure" required />
+
+    <label for="hobbies">Hobbies / interests</label>
+    <textarea id="hobbies" name="hobbies" placeholder="e.g. cooking, skateboarding, playing guitar" required></textarea>
+
+    <label for="personality">How would people describe your personality?</label>
+    <textarea id="personality" name="personality" placeholder="e.g. competitive but laid-back, stubborn, loyal to a fault" required></textarea>
+
+    <label for="selfie">Upload a selfie (optional — becomes your anime fighter portrait)</label>
+    <input id="selfie" name="selfie" type="file" accept="image/*" />
+    <img id="selfie-preview" style="display:none;" />
+
+    <button type="submit" id="submit-btn">Generate Moveset</button>
+  </form>
+
+  <p id="error"></p>
+
+  <div id="results">
+    <div id="portrait-wrap" style="display:none;">
+      <img id="portrait" alt="Your anime fighter portrait" />
+    </div>
+    <p id="portrait-status"></p>
+    <h2>Your Moveset</h2>
+    <div id="moves"></div>
+    <p id="save-status"></p>
+    <button id="battle-btn" class="secondary" type="button">Send to Battle →</button>
+  </div>
+
+  <script>
+    const form = document.getElementById('bio-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorEl = document.getElementById('error');
+    const resultsEl = document.getElementById('results');
+    const movesEl = document.getElementById('moves');
+    const battleBtn = document.getElementById('battle-btn');
+    const selfieInput = document.getElementById('selfie');
+    const selfiePreview = document.getElementById('selfie-preview');
+    const portraitWrap = document.getElementById('portrait-wrap');
+    const portraitImg = document.getElementById('portrait');
+    const portraitStatus = document.getElementById('portrait-status');
+    const saveStatusEl = document.getElementById('save-status');
+    const savedFightersEl = document.getElementById('saved-fighters');
+    const savedFightersListEl = document.getElementById('saved-fighters-list');
+    const createMatchBtn = document.getElementById('create-match-btn');
+    const joinMatchBtn = document.getElementById('join-match-btn');
+    const joinMatchCodeEl = document.getElementById('join-match-code');
+    const liveMatchStatusEl = document.getElementById('live-match-status');
+    let lastMoveset = null;
+    let lastPortrait = null;
+
+    selfieInput.addEventListener('change', () => {
+      const file = selfieInput.files[0];
+      if (!file) {
+        selfiePreview.style.display = 'none';
+        return;
+      }
+      selfiePreview.src = URL.createObjectURL(file);
+      selfiePreview.style.display = 'block';
+    });
+
+    battleBtn.addEventListener('click', () => {
+      sessionStorage.setItem('playerMoveset', JSON.stringify(lastMoveset));
+      sessionStorage.setItem('playerName', document.getElementById('charName').value.trim());
+      if (lastPortrait) {
+        sessionStorage.setItem('playerPortrait', lastPortrait);
+      } else {
+        sessionStorage.removeItem('playerPortrait');
+      }
+      sessionStorage.removeItem('opponentFighter');
+      window.location.href = '/combat.html';
+    });
+
+    function loadFighterIntoBattle(fighter) {
+      sessionStorage.setItem('playerMoveset', JSON.stringify(fighter.moves));
+      sessionStorage.setItem('playerName', fighter.name);
+      if (fighter.avatar) {
+        sessionStorage.setItem('playerPortrait', fighter.avatar);
+      } else {
+        sessionStorage.removeItem('playerPortrait');
+      }
+      sessionStorage.removeItem('opponentFighter');
+      window.location.href = '/combat.html';
+    }
+
+    function useFighterForLiveMatch(fighter) {
+      sessionStorage.setItem('playerMoveset', JSON.stringify(fighter.moves));
+      sessionStorage.setItem('playerName', fighter.name);
+      if (fighter.avatar) {
+        sessionStorage.setItem('playerPortrait', fighter.avatar);
+      } else {
+        sessionStorage.removeItem('playerPortrait');
+      }
+      liveMatchStatusEl.textContent = `"${fighter.name}" selected. Create or join a match below.`;
+    }
+
+    function challengeFighter(fighter) {
+      sessionStorage.setItem('opponentFighter', JSON.stringify({
+        name: fighter.name,
+        avatar: fighter.avatar,
+        moves: fighter.moves,
+      }));
+      window.location.href = '/combat.html';
+    }
+
+    function getMyFighter() {
+      const movesetRaw = sessionStorage.getItem('playerMoveset');
+      const name = sessionStorage.getItem('playerName');
+      if (!movesetRaw || !name) return null;
+      try {
+        const moves = JSON.parse(movesetRaw);
+        if (!Array.isArray(moves) || moves.length !== 4) return null;
+        return { name, avatar: sessionStorage.getItem('playerPortrait') || null, moves };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    createMatchBtn.addEventListener('click', async () => {
+      const fighter = getMyFighter();
+      if (!fighter) {
+        liveMatchStatusEl.textContent = 'Generate or load a fighter first.';
+        return;
+      }
+      liveMatchStatusEl.textContent = 'Creating match...';
+      try {
+        const res = await fetch('/matches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fighter }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to create match.');
+        window.location.href = `/pvp.html?match=${data.id}&player=1`;
+      } catch (err) {
+        liveMatchStatusEl.textContent = err.message;
+      }
+    });
+
+    joinMatchBtn.addEventListener('click', async () => {
+      const fighter = getMyFighter();
+      if (!fighter) {
+        liveMatchStatusEl.textContent = 'Generate or load a fighter first.';
+        return;
+      }
+      const code = joinMatchCodeEl.value.trim();
+      if (!code) {
+        liveMatchStatusEl.textContent = 'Paste a room code first.';
+        return;
+      }
+      liveMatchStatusEl.textContent = 'Joining match...';
+      try {
+        const res = await fetch(`/matches/${code}/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fighter }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not join match.');
+        window.location.href = `/pvp.html?match=${code}&player=2`;
+      } catch (err) {
+        liveMatchStatusEl.textContent = err.message;
+      }
+    });
+
+    async function loadSavedFighters() {
+      try {
+        const res = await fetch('/fighters/recent?kind=player');
+        const data = await res.json();
+        if (!data.fighters || !data.fighters.length) {
+          savedFightersEl.style.display = 'none';
+          return;
+        }
+
+        savedFightersListEl.innerHTML = '';
+        for (const fighter of data.fighters) {
+          const row = document.createElement('div');
+          row.className = 'saved-fighter';
+          const date = new Date(fighter.created_at).toLocaleDateString();
+          row.innerHTML = `
+            <span class="saved-fighter-name">${escapeHtml(fighter.name)}</span>
+            <span class="saved-fighter-date">${date}</span>
+            <button type="button" class="saved-fighter-btn fight-btn">⚔ Fight</button>
+            <button type="button" class="saved-fighter-btn battle-btn">Battle →</button>
+            <button type="button" class="saved-fighter-btn live-btn">Use for Live Match</button>
+          `;
+          row.querySelector('.battle-btn').addEventListener('click', () => loadFighterIntoBattle(fighter));
+          row.querySelector('.fight-btn').addEventListener('click', () => challengeFighter(fighter));
+          row.querySelector('.live-btn').addEventListener('click', () => useFighterForLiveMatch(fighter));
+          savedFightersListEl.appendChild(row);
+        }
+        savedFightersEl.style.display = 'block';
+      } catch (err) {
+        savedFightersEl.style.display = 'none';
+      }
+    }
+
+    async function saveFighter(bio) {
+      const charName = document.getElementById('charName').value.trim();
+      try {
+        const res = await fetch('/fighters', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: charName, avatar: lastPortrait, bio, moves: lastMoveset }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Save failed.');
+        saveStatusEl.textContent = `Saved "${charName}" to Recent Fighters.`;
+        loadSavedFighters();
+      } catch (err) {
+        saveStatusEl.textContent = '';
+      }
+    }
+
+    loadSavedFighters();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.style.display = 'none';
+      resultsEl.style.display = 'none';
+      portraitWrap.style.display = 'none';
+      portraitStatus.textContent = '';
+      saveStatusEl.textContent = '';
+      lastPortrait = null;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Generating...';
+
+      const bio = {
+        sports: document.getElementById('sports').value,
+        bestSkill: document.getElementById('bestSkill').value,
+        hobbies: document.getElementById('hobbies').value,
+        personality: document.getElementById('personality').value,
+      };
+
+      const selfieFile = selfieInput.files[0] || null;
+
+      const movesetPromise = fetch('/generate-moves', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bio),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+        return data;
+      });
+
+      let portraitPromise = Promise.resolve(null);
+      if (selfieFile) {
+        portraitStatus.textContent = 'Drawing your anime portrait...';
+        const formData = new FormData();
+        formData.append('selfie', selfieFile);
+        for (const [key, value] of Object.entries(bio)) formData.append(key, value);
+
+        portraitPromise = fetch('/generate-portrait', { method: 'POST', body: formData })
+          .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Portrait generation failed.');
+            return data;
+          })
+          .catch((err) => {
+            portraitStatus.textContent = err.message;
+            return null;
+          });
+      }
+
+      try {
+        const data = await movesetPromise;
+        lastMoveset = data.moves;
+        renderMoves(data.moves);
+        resultsEl.style.display = 'block';
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Generate Moveset';
+      }
+
+      const portraitData = await portraitPromise;
+      if (portraitData) {
+        lastPortrait = portraitData.image;
+        portraitImg.src = portraitData.image;
+        portraitWrap.style.display = 'block';
+        portraitStatus.textContent = '';
+      }
+
+      if (lastMoveset) {
+        await saveFighter(bio);
+      }
+    });
+
+    function renderMoves(moves) {
+      movesEl.innerHTML = '';
+      for (const move of moves) {
+        const div = document.createElement('div');
+        div.className = 'move';
+
+        const tags = [];
+        if (move.canCounter) tags.push('<span class="tag counter">Signature / Counterable</span>');
+        tags.push(
+          move.canBlock
+            ? '<span class="tag blockable">Blockable</span>'
+            : '<span class="tag unblockable">Unblockable</span>'
+        );
+
+        div.innerHTML = `
+          <div class="move-header">
+            <span class="move-name">${escapeHtml(move.name)}</span>
+            <span class="move-damage">${move.damage} dmg</span>
+          </div>
+          <div class="move-desc">${escapeHtml(move.description)}</div>
+          <div class="tags">${tags.join('')}</div>
+        `;
+        movesEl.appendChild(div);
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

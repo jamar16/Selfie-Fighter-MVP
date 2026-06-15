@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Selfie Fighter — Battle</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <h1>Battle</h1>
+  <p class="subtitle">Pick your attack, then brace for what's coming.</p>
+
+  <div id="no-moveset">
+    <p>No moveset found in this session.</p>
+    <button id="demo-btn" type="button">Load Demo Fighter</button>
+    <a class="back-link" href="/">← Generate a moveset instead</a>
+  </div>
+
+  <div id="battle" style="display:none;">
+    <a class="back-link" href="/">← Quit battle</a>
+    <div class="fighters">
+      <div class="fighter">
+        <div class="avatar" id="player-avatar">🥋</div>
+        <h3>You</h3>
+        <div class="hp-bar"><div class="hp-fill" id="player-hp-fill"></div></div>
+        <div class="hp-label" id="player-hp-label">100 / 100</div>
+      </div>
+      <div class="fighter">
+        <div class="avatar" id="cpu-avatar">❓</div>
+        <h3 id="cpu-name">???</h3>
+        <div class="hp-bar"><div class="hp-fill" id="cpu-hp-fill"></div></div>
+        <div class="hp-label" id="cpu-hp-label">100 / 100</div>
+      </div>
+    </div>
+
+    <p id="opponent-status" class="section-hint">Scouting today's opponent...</p>
+
+    <div id="fight-controls" style="display:none;">
+      <p class="section-label">Choose your attack</p>
+      <p class="section-hint">This is the move you'll throw this turn.</p>
+      <div class="move-pick" id="attack-picks"></div>
+
+      <p class="section-label">Brace for incoming</p>
+      <p class="section-hint">Which of the opponent's moves are you reading? Guess their ★ signature move correctly and it backfires on them.</p>
+      <div class="move-pick" id="guess-picks"></div>
+
+      <button id="fight-btn" type="button" disabled>Fight!</button>
+    </div>
+
+    <div id="log"></div>
+
+    <div id="game-over" style="display:none;">
+      <button id="restart-btn" type="button">Rematch</button>
+      <a class="back-link" href="/">← New character</a>
+    </div>
+  </div>
+
+  <script src="/combat.js"></script>
+</body>
+</html>
