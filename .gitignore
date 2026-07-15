@@ -1,2 +1,5 @@
 node_modules/
 .env
+
+# Session transcripts stay local: this repo is PUBLIC
+Conversation-Archive/
